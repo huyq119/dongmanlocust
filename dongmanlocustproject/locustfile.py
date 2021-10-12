@@ -107,10 +107,22 @@ def get_body(neo_id):
 class EpisodeList(FastHttpUser):
     host = "http://qaapis.dongmanmanhua.cn"
 
+    @tag('tag1')
     @task
     def test_new(self):
         message = "/app/episode/list/v4?expires=1634972054459&language=zh-hans&locale=zh_CN&md5=EQAb0BWn7ohgVq" \
                   "-B_EGz4w&pageSize=214&platform=APP_IPHONE&serviceZone=CHINA&startIndex=0&titleNo=735&v=8 "
         r = self.client.get(message)
         print(r.status_code)
+        wait_time = between(1, 5)
+
+    @tag('tag2')
+    @task
+    def test_card4(self):
+        for title_name in yaml.safe_load(open("../dongmanlocustproject/title_name.yml")):
+            message = f"/app/home/card4?expires=1634028869836&language=zh-hans&locale=zh_CN" \
+                      f"&md5=AiUM4xmOUDt5H4YmIdPAWA&platform=APP_IPHONE&serviceZone=CHINA&sortOrder=UPDATE&" \
+                      f"weekday={title_name}&bannerImageType=Default"
+            r = self.client.get(message)
+            assert r.status_code == 200
         wait_time = between(1, 5)
