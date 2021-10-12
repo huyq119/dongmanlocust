@@ -105,7 +105,7 @@ def get_body(neo_id):
 #         wait_time = between(0.5, 10)
 
 class EpisodeList(FastHttpUser):
-    host = "http://qaapis.dongmanmanhua.cn"
+    host = "https://qaapis02.dongmanmanhua.cn"
 
     @tag('tag1')
     @task
