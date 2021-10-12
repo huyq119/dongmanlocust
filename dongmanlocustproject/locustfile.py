@@ -1,9 +1,10 @@
 import json
 import logging
 import time
+from datetime import datetime
 
 import yaml
-from locust import FastHttpUser, task, between, tag, events
+from locust import FastHttpUser, task, between, tag, events, LoadTestShape
 from locust.runners import MasterRunner, WorkerRunner
 
 import getkey
@@ -105,7 +106,7 @@ def get_body(neo_id):
 #         wait_time = between(0.5, 10)
 
 class EpisodeList(FastHttpUser):
-    host = "https://qaapis02.dongmanmanhua.cn"
+    host = "https://qaapis.dongmanmanhua.cn"
 
     @tag('tag1')
     @task
@@ -126,3 +127,25 @@ class EpisodeList(FastHttpUser):
             r = self.client.get(message)
             assert r.status_code == 200
         wait_time = between(1, 5)
+
+
+class MyCustomShape(LoadTestShape):
+    # time_limit设置时限整个压测过程为60秒
+    time_limit = 60
+    # 设置产生率一次启动10个用户
+    spawn_rate = 1
+
+    def tick(self):
+        """
+        设置 tick()函数
+        并在tick()里面调用 get_run_time()方法
+        """
+        # 调用get_run_time()方法获取压测执行的时间
+        run_time = self.get_run_time()
+        # 运行时间在 time_limit之内，则继续执行
+        if run_time < self.time_limit:
+            # user_count计算每10秒钟增加10个
+            user_count = round(run_time, -1)
+            print(str(user_count) + ">>>>>" + datetime.now().strftime('%Y-%m-%d-%H:%M:%S.%f'))
+            return user_count, self.spawn_rate
+        return None
