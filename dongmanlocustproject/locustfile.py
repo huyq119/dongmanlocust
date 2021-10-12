@@ -131,7 +131,7 @@ class EpisodeList(FastHttpUser):
 
 class MyCustomShape(LoadTestShape):
     # time_limit设置时限整个压测过程为60秒
-    time_limit = 60
+    time_limit = 600
     # 设置产生率一次启动10个用户
     spawn_rate = 1
 
