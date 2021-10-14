@@ -85,10 +85,12 @@ def get_body(neo_id):
 class RecommendPost(FastHttpUser):
     host = "https://qarec.dongmanmanhua.cn"
 
-    @tag('tag1')
     @task
     def reporting_request_one(self):
         id_list = yaml.safe_load(open("../dongmanlocustproject/neoid.yml"))
+        # id_list = ['66437720-1b6f-11ec-a291-00163e06a3f6', '039b7270-1b52-11ec-864f-00163e069c9c', 'ffe4db10-f8cb'
+        #                                                                                            '-11eb-864f'
+        #                                                                                            '-00163e069c9c']
         message = "/airec/behavior/data/reporting"
         for neo_id in id_list:
             body_content = get_body(neo_id)
@@ -97,16 +99,6 @@ class RecommendPost(FastHttpUser):
             print("Response status code:", r.status_code)
             assert r.status_code == 200
         wait_time = between(1, 10)
-
-    @tag('tag2')
-    @task
-    def reporting_request_two(self):
-        id_list = yaml.safe_load(open("../dongmanlocustproject/neoid.yml"))
-        message = "/airec/behavior/data/reporting"
-        for neo_id in id_list:
-            body_content = get_body(neo_id)
-            r = self.client.post(message, json=body_content)
-        wait_time = between(0.5, 10)
 
 # class EpisodeList(FastHttpUser):
 #     host = "https://qaapis.dongmanmanhua.cn"
@@ -242,46 +234,46 @@ class RecommendPost(FastHttpUser):
 #         current_step = math.floor(run_time / self.step_time) + 1
 #         return current_step * self.step_load, self.spawn_rate
 
-Step = namedtuple("Step", ["users", "dwell"])
+# Step = namedtuple("Step", ["users", "dwell"])
 
 
-class StepLoadShape(LoadTestShape):
-    """
-    A step load shape that waits until the target user count has
-    been reached before waiting on a per-step timer.
-    The purpose here is to ensure that a target number of users is always reached,
-    regardless of how slow the user spawn rate is. The dwell time is there to
-    observe the steady state at that number of users.
-    Keyword arguments:
-        targets_with_times -- iterable of 2-tuples, with the desired user count first,
-            and the dwell (hold) time with that user count second
-    """
-
-    targets_with_times = (Step(5, 10), Step(10, 10), Step(20, 10), Step(30, 10), Step(40, 10), Step(50, 20),
-                          Step(40, 10), Step(30, 10), Step(20, 10), Step(10, 10), Step(5, 10))
-
-    def __init__(self, *args, **kwargs):
-        self.step = 0
-        self.time_active = False
-        super(StepLoadShape, self).__init__(*args, **kwargs)
-
-    def tick(self):
-        if self.step >= len(self.targets_with_times):
-            return None
-
-        target = self.targets_with_times[self.step]
-        users = self.get_current_user_count()
-
-        if target.users == users:
-            if not self.time_active:
-                self.reset_time()
-                self.time_active = True
-            run_time = self.get_run_time()
-            if run_time > target.dwell:
-                self.step += 1
-                self.time_active = False
-
-        # Spawn rate is the second value here. It is not relevant because we are
-        # rate-limited by the User init rate.  We set it arbitrarily high, which
-        # means "spawn as fast as you can"
-        return target.users, 100
+# class StepLoadShape(LoadTestShape):
+#     """
+#     A step load shape that waits until the target user count has
+#     been reached before waiting on a per-step timer.
+#     The purpose here is to ensure that a target number of users is always reached,
+#     regardless of how slow the user spawn rate is. The dwell time is there to
+#     observe the steady state at that number of users.
+#     Keyword arguments:
+#         targets_with_times -- iterable of 2-tuples, with the desired user count first,
+#             and the dwell (hold) time with that user count second
+#     """
+#
+#     targets_with_times = (Step(5, 10), Step(10, 10), Step(20, 10), Step(30, 10), Step(40, 10), Step(50, 20),
+#                           Step(100, 20), Step(30, 10), Step(20, 10), Step(10, 10), Step(5, 10))
+#
+#     def __init__(self, *args, **kwargs):
+#         self.step = 0
+#         self.time_active = False
+#         super(StepLoadShape, self).__init__(*args, **kwargs)
+#
+#     def tick(self):
+#         if self.step >= len(self.targets_with_times):
+#             return None
+#
+#         target = self.targets_with_times[self.step]
+#         users = self.get_current_user_count()
+#
+#         if target.users == users:
+#             if not self.time_active:
+#                 self.reset_time()
+#                 self.time_active = True
+#             run_time = self.get_run_time()
+#             if run_time > target.dwell:
+#                 self.step += 1
+#                 self.time_active = False
+#
+#         # Spawn rate is the second value here. It is not relevant because we are
+#         # rate-limited by the User init rate.  We set it arbitrarily high, which
+#         # means "spawn as fast as you can"
+#         return target.users, 100
